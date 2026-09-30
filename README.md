@@ -76,3 +76,18 @@ npm run dev
   `backend/app/routers/<模块>.py`，业务规则在 `backend/app/services/<模块>.py`。
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
+
+## 船舶作业链
+
+船舶（`vessel`）下挂作业条目（内部表 `_vessel_work` / `_vessel_ledger`，不出现在运营概览），
+条目只能沿 `待开工 → 作业中 → 已核对` 单向推进，再由「确认离泊」收口：
+
+- 只许顺推一格：待开工不能直接核对，已核对不能退回开工，已离泊不能再打回。
+- 同船条目可多选整组提交（`POST /api/vessel/works/batch`），跨船混选会被拒；
+  组内重复的条目自动去重，带 `idempotency_key` 的同批重放只生效一次。
+- 打回（`POST /api/vessel/works/{id}/reject`）只允许单条，仅该条目回到待开工重走。
+- 全部条目核对完成后才允许确认离泊；离泊后按船去重回写一条台账待办
+  （`GET /api/vessel/ledger`，同船重复离泊只更新不新增）。
+- 作业看板（`GET /api/vessel/board`）的箱量直接对作业明细求和，与明细列表同源。
+- 登记船舶与任何条目提交都要求航线代码非空。
+

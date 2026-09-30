@@ -16,7 +16,7 @@ class Store:
         }
 
     def module_names(self) -> list[str]:
-        return sorted(self._tables)
+        return sorted(name for name in self._tables if not name.startswith("_"))
 
     def rows(self, module: str) -> list[dict[str, Any]]:
         return self._tables.setdefault(module, [])
@@ -24,6 +24,13 @@ class Store:
     def find(self, module: str, entry_id: int) -> dict[str, Any] | None:
         for row in self.rows(module):
             if int(row.get("id", 0)) == entry_id:
+                return row
+        return None
+
+    def find_by(self, module: str, field: str, value: Any) -> dict[str, Any] | None:
+        """按业务键取单条记录，供台账去重这类幂等判断使用。"""
+        for row in self.rows(module):
+            if row.get(field) == value:
                 return row
         return None
 

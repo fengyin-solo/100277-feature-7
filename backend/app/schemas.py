@@ -28,6 +28,27 @@ class EntryPayload(BaseModel):
     remark: str | None = None
 
 
+class BatchWorkPayload(BaseModel):
+    """同一条船下作业条目整组提交的载荷。"""
+
+    work_ids: list[int] = Field(default_factory=list)
+    action: str
+    vessel_id: int | None = None
+    idempotency_key: str | None = None
+
+
+class BatchWorkResult(BaseModel):
+    """整组提交逐条给出结果；重复或状态不符的条目走 skipped/conflicted。"""
+
+    ok: bool
+    message: str
+    action: str
+    advanced: list[dict[str, Any]] = Field(default_factory=list)
+    skipped: list[dict[str, Any]] = Field(default_factory=list)
+    conflicted: list[dict[str, Any]] = Field(default_factory=list)
+    ledger: dict[str, Any] | None = None
+    duplicate: bool = False
+
 
 class BerthEntry(BaseModel):
     """泊位明细结构。"""
