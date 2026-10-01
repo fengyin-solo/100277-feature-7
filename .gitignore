@@ -8,6 +8,7 @@ node_modules/
 .venv/
 venv/
 env/
+.pydeps/
 __pycache__/
 *.py[cod]
 *.egg-info/

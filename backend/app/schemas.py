@@ -28,6 +28,14 @@ class EntryPayload(BaseModel):
     remark: str | None = None
 
 
+class BatchItemPayload(BaseModel):
+    """同一条船下多个作业条目的整组提交。"""
+
+    action: str = Field(description="开工 / 核对，只能把条目顺着作业链推进一格")
+    item_ids: list[int] = Field(default_factory=list, description="同一条船下被多选的作业条目 id")
+    batch_no: str | None = Field(default=None, description="同一批提交的幂等批次号，重复提交只留一条")
+
+
 
 class BerthEntry(BaseModel):
     """泊位明细结构。"""

@@ -10,13 +10,16 @@ from app.seed import SEED_ROWS
 
 
 class Store:
+    # 船舶作业的内部数据表（作业条目、台账待办、整组批次），不单独计入运营概览的业务模块。
+    INTERNAL_MODULES = {"vessel_item", "vessel_todo", "vessel_batch"}
+
     def __init__(self) -> None:
         self._tables: dict[str, list[dict[str, Any]]] = {
             name: [dict(row) for row in rows] for name, rows in SEED_ROWS.items()
         }
 
     def module_names(self) -> list[str]:
-        return sorted(self._tables)
+        return sorted(name for name in self._tables if name not in self.INTERNAL_MODULES)
 
     def rows(self, module: str) -> list[dict[str, Any]]:
         return self._tables.setdefault(module, [])
